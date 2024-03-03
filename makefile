@@ -40,5 +40,6 @@ endif
 	mops add memory-buffer
 	mops add test
 	mops add memory-region
+	mops add bench --dev
 	mops update
 	dfx upgrade

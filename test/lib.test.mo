@@ -146,8 +146,17 @@ import { test; suite } "mo:test";
                     let address2 = mem.put(key2, ownType3Blob);
                     assert (address1 != address2);
 
+                    var result1 = mem.get(key1);
+                    var result2 = mem.get(key2);
+
+                    ownType_blobs_are_not_null_and_equal_check(result1, Option.make(ownType1Blob));
+                    ownType_blobs_are_not_null_and_equal_check(result2, Option.make(ownType3Blob));
+
                     let address3 = mem.put(key1, ownType2Blob);
                     assert ( address3 == address1);
+                    
+                    result1 := mem.get(key1);
+                    ownType_blobs_are_not_null_and_equal_check(result1, Option.make(ownType2Blob));
 
                     let shouldFitType:OwnType = {
                         myNumber = ownType2.myNumber;
@@ -158,6 +167,10 @@ import { test; suite } "mo:test";
                     let address4 = mem.put(key1, blob1);
                     assert ( address4 == address1);
 
+                    result1 := mem.get(key1);
+                    ownType_blobs_are_not_null_and_equal_check(result1, Option.make(blob1));
+
+
                     let shouldNotFitType:OwnType = {
                         myNumber = ownType2.myNumber;
                         myText = "Hello Worldabcdefghijklmnopqrst";
@@ -166,6 +179,13 @@ import { test; suite } "mo:test";
                     let blob2 = to_candid(shouldNotFitType);
                     let address5 = mem.put(key1, blob2);
                     assert ( address5 != address1);
+
+                    result1 := mem.get(key1);
+                    ownType_blobs_are_not_null_and_equal_check(result1, Option.make(blob2));
+
+                    // Check if value for key2 is still the same, because key2 was untouched
+                    result2 := mem.get(key2);
+                    ownType_blobs_are_not_null_and_equal_check(result2, Option.make(ownType3Blob)); 
                 },
 
             );
