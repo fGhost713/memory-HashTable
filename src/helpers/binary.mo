@@ -14,6 +14,7 @@ module {
         toNat16 : ([Nat8]) -> Nat16;
         toNat32 : ([Nat8]) -> Nat32;
         toNat64 : ([Nat8]) -> Nat64;
+        toNat64FromOffset : ([Nat8], offset : Nat) -> Nat64;
     };
 
     private func nat16to8(n : Nat16) : Nat8 = Nat8.fromIntWrap(Nat16.toNat(n));
@@ -52,6 +53,10 @@ module {
 
         toNat64 = func(src : [Nat8]) : Nat64 {
             nat8to64(src[0]) | nat8to64(src[1]) << 8 | nat8to64(src[2]) << 16 | nat8to64(src[3]) << 24 | nat8to64(src[4]) << 32 | nat8to64(src[5]) << 40 | nat8to64(src[6]) << 48 | nat8to64(src[7]) << 56;
+        };
+
+        toNat64FromOffset = func(src : [Nat8], offset : Nat) : Nat64 {
+            nat8to64(src[0 +offset]) | nat8to64(src[1 +offset]) << 8 | nat8to64(src[2 +offset]) << 16 | nat8to64(src[3 +offset]) << 24 | nat8to64(src[4 +offset]) << 32 | nat8to64(src[5 +offset]) << 40 | nat8to64(src[6 +offset]) << 48 | nat8to64(src[7 +offset]) << 56;
         };
 
         fromNat64 = func(n : Nat64) : [Nat8] {
@@ -95,6 +100,10 @@ module {
 
         toNat64 = func(src : [Nat8]) : Nat64 {
             nat8to64(src[7]) | nat8to64(src[6]) << 8 | nat8to64(src[5]) << 16 | nat8to64(src[4]) << 24 | nat8to64(src[3]) << 32 | nat8to64(src[2]) << 40 | nat8to64(src[1]) << 48 | nat8to64(src[0]) << 56;
+        };
+
+        toNat64FromOffset = func(src : [Nat8], offset : Nat) : Nat64 {
+            nat8to64(src[7 +offset]) | nat8to64(src[6 +offset]) << 8 | nat8to64(src[5 +offset]) << 16 | nat8to64(src[4 +offset]) << 24 | nat8to64(src[3 +offset]) << 32 | nat8to64(src[2 +offset]) << 40 | nat8to64(src[1 +offset]) << 48 | nat8to64(src[0 +offset]) << 56;
         };
 
         fromNat64 = func(n : Nat64) : [Nat8] {

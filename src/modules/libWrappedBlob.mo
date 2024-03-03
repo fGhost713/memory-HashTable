@@ -12,6 +12,7 @@ import Itertools "mo:itertools/Iter";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
 import Debug "mo:base/Debug";
+import Array "mo:base/Array";
 import libKeyInfo "libKeyInfo";
 import { MemoryRegion } "mo:memory-region";
 import libIndexMapping "libIndexMapping";
@@ -29,6 +30,14 @@ module {
         let totalSize = Region.loadNat64(memoryStorage.memory_region.region, address);
         let blobResult : Blob = MemoryRegion.loadBlob(memoryStorage.memory_region, Nat64.toNat(address), Nat64.toNat(totalSize));
         return convert_wrappedblob_as_blob_to_wrappedBlob(blobResult);
+    };
+
+    // Get the internal blob from WrappBlob-Address
+    public func get_internal_blob_from_memory(memoryStorage : MemoryStorage, address : Nat64):Blob{
+        
+        let internalBlobSize = Nat64.toNat(Region.loadNat64(memoryStorage.memory_region.region, address + 8));
+        let internalBlobAddress = address + 16;
+        return Region.loadBlob(memoryStorage.memory_region.region, internalBlobAddress, internalBlobSize);
     };
 
     // Add or update value by key
@@ -49,9 +58,9 @@ module {
                 var updatePossible : Bool = false;
 
 
-                if (totalSizeFromAlreadyStoredBlob > 16) {
+                if (totalSizeFromAlreadyStoredBlob > memoryStorage.replaceBufferSize) {
 
-                    let freeSizeAvailable : Nat = Nat64.toNat(totalSizeFromAlreadyStoredBlob) - 16;                           
+                    let freeSizeAvailable : Nat = Nat64.toNat(totalSizeFromAlreadyStoredBlob - memoryStorage.replaceBufferSize);                           
                     if (blobToStoreOrUpdateSize <= freeSizeAvailable) {
                         updatePossible := true;
                     };
@@ -102,7 +111,7 @@ module {
     };
 
     // Delete entry by key
-    public func delete(key : Blob, memoryStorage : MemoryStorage) : Result.Result<Blob, Text> {
+    public func delete(key : Blob, memoryStorage : MemoryStorage){
 
         let keyResult = libKeyInfo.get_keyinfo(key, memoryStorage);
         let keyInfoAddress = keyResult.1;
@@ -116,28 +125,25 @@ module {
 
                 let wrappedBlobSize = get_wrapped_blob_totalsize(memoryStorage, wrappedBlobAddress);
 
-                let deletedWrappedBlobAsBlob : Blob = MemoryRegion.removeBlob(
+                ignore MemoryRegion.removeBlob(
                     memoryStorage.memory_region,
                     Nat64.toNat(wrappedBlobAddress),
                     Nat64.toNat(wrappedBlobSize),
                 );
 
-                let deletedInternalBlob = get_internal_blob_from_blob(deletedWrappedBlobAsBlob);
-
                 // Delete value from index-mappings-list
                 libIndexMapping.remove_value(key, memoryStorage, keyInfoAddress);
 
-                return #ok(deletedInternalBlob);
-
             };
             case (_) {
-                return #err("Key not found.");
+               // do nothing
             };
         };
     };
 
     // Helper functions:
 
+    // Add new entry (key and value). Assumption here is that the key was not existing before.
     private func add_new_item_internal_and_update_key_mappings(
         key : Blob,
         memoryStorage : MemoryStorage,
@@ -147,18 +153,18 @@ module {
         // store the blob into memory
         let valueStoredAddressNat64 : Nat64 = create_and_add_new_wrappedblob_into_memory_Internal(memoryStorage, blobToStore);
 
-        // Create and store the related KeyInfo
-        let keySize : Nat64 = Nat64.fromNat(key.size());
-        let newKeyInfo : KeyInfo = {
-            totalSize : Nat64 = keySize + 24;
-            sizeOfKeyBlob : Nat64 = keySize;
-            wrappedBlobAddress : Nat64 = valueStoredAddressNat64;
-            keyAsBlob : Blob = key;
-        };
-        let newKeyInfoAsBlob : Blob = libKeyInfo.convert_keyinfo_to_blob(newKeyInfo);
+        // First add dummy blob into memory
+        let dummyKeyInfoSizeNeeded:Nat = key.size() + 24;
+        let dummyBytes = Array.tabulate<Nat8>(dummyKeyInfoSizeNeeded, func i = 255);
+        let dummyBlob:Blob = Blob.fromArray(dummyBytes);
+        let keyInfoAddress:Nat = MemoryRegion.addBlob(memoryStorage.memory_region, dummyBlob);
+        let keyInfoAddressNat64:Nat64 = Nat64.fromNat(keyInfoAddress);
 
-        // Store the KeyInfo into memory
-        let keyInfoAddressNat64 : Nat64 = libKeyInfo.add_new_keyinfo_directly_into_memory(memoryStorage, newKeyInfoAsBlob);
+        // Now update the keyinfo memory values
+        Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64, Nat64.fromNat(dummyKeyInfoSizeNeeded));
+        Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64 + 8, Nat64.fromNat(key.size()));
+        Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64 + 16, valueStoredAddressNat64);
+        Region.storeBlob(memoryStorage.memory_region.region, keyInfoAddressNat64 + 24, key);
 
         // Add entry in index_mappings
         var newList : List.List<Nat64> = List.nil<Nat64>();
@@ -169,13 +175,26 @@ module {
         return (keyInfoAddressNat64, valueStoredAddressNat64);
     };
 
+    // First we will store dummy blob into memory and then manipulate the memory-location so that all necessary information is included.
+    // This method is faster than the native approach: create WrappedBlob-type and then convert to blob and then store that blob into memory. 
     private func create_and_add_new_wrappedblob_into_memory_Internal(memoryStorage : MemoryStorage, internalBlobToStore : Blob) : Nat64 {
 
-        let storeItem : WrappedBlob = create_Wrapped_blob_from_internalblob(internalBlobToStore);
-        let blob_fromWrappedBlob : Blob = convert_wrappedblob_to_blob(storeItem, true);
-        return put_wrappedblob_as_blob_directly_into_memory(memoryStorage, blob_fromWrappedBlob);
+        // First add dummy blob into memory
+        let wrappedBlobSizeNeeded:Nat = internalBlobToStore.size() + 16 + Nat64.toNat(memoryStorage.replaceBufferSize);
+        let dummyBytes = Array.tabulate<Nat8>(wrappedBlobSizeNeeded, func i = 255);
+        let dummyBlob:Blob = Blob.fromArray(dummyBytes);
+        let memoryAddress:Nat = MemoryRegion.addBlob(memoryStorage.memory_region, dummyBlob);
+        let memoryAddressNat64:Nat64 = Nat64.fromNat(memoryAddress);
+
+        // Now update the wrappedBlob from writing into memory-location directly
+        Region.storeNat64(memoryStorage.memory_region.region,  memoryAddressNat64, Nat64.fromNat(wrappedBlobSizeNeeded));
+        Region.storeNat64(memoryStorage.memory_region.region,  memoryAddressNat64 + 8, Nat64.fromNat(internalBlobToStore.size()));
+        Region.storeBlob(memoryStorage.memory_region.region, memoryAddressNat64 + 16 , internalBlobToStore);
+
+        return memoryAddressNat64;
     };
 
+    
     private func create_Wrapped_blob_from_internalblob(blob : Blob) : WrappedBlob {
 
         let internalBlobSize = Nat64.fromNat(blob.size());
@@ -200,19 +219,22 @@ module {
         return totalSize;
     };
 
-    private func get_internal_blob_from_blob(item : Blob) : Blob {
-        let blobArray = Blob.toArray(item);
-        let internalBlobSize : Nat64 = Binary.LittleEndian.toNat64(Iter.toArray(Itertools.fromArraySlice(blobArray, 8, 16)));
-        let internalBlob : Blob = Blob.fromArray(Iter.toArray(Itertools.fromArraySlice(blobArray, 16, 16 + Nat64.toNat(internalBlobSize))));
+    public func get_internal_blob_from_blob(item : Blob) : Blob {
+        
+        let blobArray:[Nat8] = Blob.toArray(item);
+        let internalBlobSize : Nat64 = Binary.LittleEndian.toNat64FromOffset(blobArray , 8);
+        let internalBlob : Blob = Blob.fromArray(Array.subArray(blobArray, 16, Nat64.toNat(internalBlobSize)));
+
         return internalBlob;
     };
 
-    private func convert_wrappedblob_as_blob_to_wrappedBlob(item : Blob) : WrappedBlob {
 
-        let blobArray = Blob.toArray(item);
-        let totalBytes : Nat64 = Binary.LittleEndian.toNat64(Iter.toArray(Itertools.fromArraySlice(blobArray, 0, 8)));
-        let internalBlobSize : Nat64 = Binary.LittleEndian.toNat64(Iter.toArray(Itertools.fromArraySlice(blobArray, 8, 16)));
-        let internalBlob : Blob = Blob.fromArray(Iter.toArray(Itertools.fromArraySlice(blobArray, 16, 16 + Nat64.toNat(internalBlobSize))));
+      private func convert_wrappedblob_as_blob_to_wrappedBlob(item : Blob) : WrappedBlob {
+
+        let blobArray:[Nat8] = Blob.toArray(item);
+        let totalBytes : Nat64 = Binary.LittleEndian.toNat64(blobArray);
+        let internalBlobSize : Nat64 = Binary.LittleEndian.toNat64FromOffset(blobArray, 8);
+        let internalBlob : Blob = Blob.fromArray(Array.subArray(blobArray, 16,Nat64.toNat(internalBlobSize)));
 
         let result : WrappedBlob = {
             totalSize = totalBytes;
@@ -227,12 +249,13 @@ module {
 
     };
 
-    private func convert_wrappedblob_to_blob(item : WrappedBlob, addReplaceBuffer:Bool) : Blob {
+    
+    private func convert_wrappedblob_to_blob(memoryStorage: MemoryStorage, item : WrappedBlob, addReplaceBuffer:Bool) : Blob {
 
         let blobSizeBytes : Nat64 = Nat64.fromNat(item.internalBlob.size());
         var totalBytes : Nat64 = blobSizeBytes + 16; // 16 bytes => 2 * Nat64 = 2 * 8 bytes = 16 bytes
         if (addReplaceBuffer == true){
-            totalBytes:=totalBytes + 8;
+            totalBytes:=totalBytes + memoryStorage.replaceBufferSize;
         };
 
         let blob_totalSize : [Nat8] = Binary.LittleEndian.fromNat64(totalBytes);
@@ -240,10 +263,11 @@ module {
 
         var iter = Iter.fromArray(blob_totalSize);
         iter := Itertools.chain(iter, Iter.fromArray(blob_internalBlobSize));
-        iter := Itertools.chain(iter, Iter.fromArray(Blob.toArray(item.internalBlob)));
-        if (addReplaceBuffer == true){
+        iter := Itertools.chain(iter, item.internalBlob.vals());
+        if (addReplaceBuffer == true and memoryStorage.replaceBufferSize > 0){
             // Add 8 bytes (Nat64 as blob)
-            iter := Itertools.chain(iter, Iter.fromArray(blob_internalBlobSize));
+             
+            iter := Itertools.chain(iter, Iter.fromArray(memoryStorage.replaceBufferAsBlob));
         };
 
         let result : Blob = Blob.fromArray(Iter.toArray(iter));

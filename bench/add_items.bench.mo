@@ -16,7 +16,7 @@ module {
         bench.description("Add new items benchmark");
 
         bench.rows(["memoryHashTable"]);
-        bench.cols(["1","10", "100", "1000","10000", "100000"]);
+        bench.cols(["1","10", "100", "1000","10000"]);
 
         type OwnType = {
             myNumber : Nat;
@@ -30,7 +30,7 @@ module {
         };
 
         let ownType1Blob : Blob = to_candid (ownType1);
-        let memoryItem = lib.get_new_memory_storage();
+        let memoryItem = lib.get_new_memory_storage(8);
         let mem = lib.MemoryHashTable(memoryItem);
 
 

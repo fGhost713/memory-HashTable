@@ -109,7 +109,7 @@ import { test; suite } "mo:test";
                 "put test",
                 func() {
 
-                    let memoryItem = lib.get_new_memory_storage();
+                    let memoryItem = lib.get_new_memory_storage(0);
                     let mem = lib.MemoryHashTable(memoryItem);
 
                     let key1 : Blob = lib.Blobify.Text.to_blob("key1");
@@ -136,7 +136,7 @@ import { test; suite } "mo:test";
                 "update test",
                 func() {
 
-                    let memoryItem = lib.get_new_memory_storage();
+                    let memoryItem = lib.get_new_memory_storage(8);
                     let mem = lib.MemoryHashTable(memoryItem);
 
                     let key1 : Blob = lib.Blobify.Text.to_blob("key1");
@@ -193,7 +193,7 @@ import { test; suite } "mo:test";
                 "delete test",
                 func() {
 
-                    let memoryItem = lib.get_new_memory_storage();
+                    let memoryItem = lib.get_new_memory_storage(8);
                     let mem = lib.MemoryHashTable(memoryItem);
 
                     let key1 : Blob = lib.Blobify.Text.to_blob("key1");
@@ -203,7 +203,7 @@ import { test; suite } "mo:test";
                     ignore mem.put(key2, ownType3Blob);
                     ignore mem.put(key2, ownType2Blob);
 
-                    let deleteResult =  mem.delete(key2);
+                    mem.delete(key2);
 
                     var result1 = mem.get(key1);
                     var result2 = mem.get(key2);

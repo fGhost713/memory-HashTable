@@ -1,7 +1,6 @@
 import HashTableTypes "../types/hashTableTypes";
 import LibKeyInfo "libKeyInfo";
 import LibWrappedBlob "libWrappedBlob";
-import CommonHashTable "commonHashTable";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
 import BlobifyModule "mo:memory-buffer/Blobify";
@@ -29,12 +28,9 @@ module {
             let keyInfoOrNull = keyInfo.0;
             switch (keyInfoOrNull) {
                 case (?keyinfo) {
-                    let wrappedBlob : WrappedBlob = LibWrappedBlob.get_wrappedBlob_from_memory(
-                        memoryStorage,
-                        keyinfo.wrappedBlobAddress,
-                    );
-
-                    return Option.make(wrappedBlob.internalBlob);
+                    let internalBlob:Blob = LibWrappedBlob.get_internal_blob_from_memory( memoryStorage,
+                        keyinfo.wrappedBlobAddress);
+                    return Option.make(internalBlob);
                 };
                 case (_) {
                     return null;
@@ -43,17 +39,10 @@ module {
         };
 
         // Delete value by key
-        public func delete(key : Blob) : ?Blob {
-            let result = LibWrappedBlob.delete(key, memoryStorage);
-            switch (result){
-                case (#ok(blob)){
-                    return Option.make(blob);
-                };
-                case (_){
-                    return null;
-                }
-            };
+        public func delete(key : Blob) {
+            LibWrappedBlob.delete(key, memoryStorage);         
         };
+
     };
 
 };
