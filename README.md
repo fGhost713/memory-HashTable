@@ -26,9 +26,12 @@ for the blob-value.
 
     actor {
 
-        // (1) Initialize the memory-storage. Here parameter value 8 is used. This means that we will use 8 bytes as replace-buffer.
-        //     So if we later want to update a blob for a key (in memory), and the new blob-size is not greater than the
-        //     size of the initial-blob + 8 bytes (replacebuffer) then the existing memory-location will be used for updating the blob.
+        // (1) Initialize the memory-storage. Here parameter value 8 is used. 
+        // This means that we will use 8 bytes as replace-buffer.
+        //     So if we later want to update a blob for a key (in memory), 
+        //     and the new blob-size is not greater than the
+        //     size of the initial-blob + 8 bytes (replacebuffer) then the existing 
+        //     memory-location will be used for updating the blob.
         //     Else we will need to allocate new memory and store the blob into new location.
 
         stable var mem = lib.get_new_memory_storage(8);
