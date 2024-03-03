@@ -24,7 +24,7 @@ module {
     private type KeyInfo = HashTableTypes.KeyInfo;
     private func nat32Identity(n : Nat32) : Nat32 { return n };
 
-    // Returns the wrapped-blob by address - without checking before if the item exist.
+    // Returns the wrapped-blob by address - without checking before if item exist.
     // So we must be sure that the item on that address exist.
     public func get_wrappedBlob_from_memory(memoryStorage : MemoryStorage, address : Nat64) : WrappedBlob {
         let totalSize = Region.loadNat64(memoryStorage.memory_region.region, address);
@@ -32,7 +32,7 @@ module {
         return convert_wrappedblob_as_blob_to_wrappedBlob(blobResult);
     };
 
-    // Get the internal blob from WrappBlob-Address
+    // Get the internal blob from WrappedBlob-Address
     public func get_internal_blob_from_memory(memoryStorage : MemoryStorage, address : Nat64):Blob{
         
         let internalBlobSize = Nat64.toNat(Region.loadNat64(memoryStorage.memory_region.region, address + 8));

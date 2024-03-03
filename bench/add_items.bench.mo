@@ -16,7 +16,7 @@ module {
         bench.description("Add new items benchmark");
 
         bench.rows(["memoryHashTable"]);
-        bench.cols(["1","10", "100", "1000","10000"]);
+        bench.cols(["1","10", "100", "1000","10000", "100000"]);
 
         type OwnType = {
             myNumber : Nat;

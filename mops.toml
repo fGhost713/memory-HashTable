@@ -1,7 +1,7 @@
 [package]
 name = "memory-hashtable"
 version = "1.0.0"
-description = "Storing/updating/retreiving of a single blob-value per key. (url: https://github.com/fGhost713/memory-HashTable)"
+description = "Storing/updating/deletion/retrieving of a single blob-value per key. (url: https://github.com/fGhost713/memory-HashTable)"
 repository = "https://github.com/fGhost713/memory-HashTable"
 keywords = [ "storing", "memory", "hashlist", "hashmap", "datastructure" ]
 license = "MIT"

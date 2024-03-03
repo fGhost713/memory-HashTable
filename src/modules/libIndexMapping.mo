@@ -17,6 +17,7 @@ module {
     private type MemoryStorage = HashTableTypes.MemoryStorage;
     private func nat32Identity(n : Nat32) : Nat32 { return n };
 
+    // Rmove key from index-mapping list
     public func remove_value(key : Blob, memoryStorage : MemoryStorage, valueToRemove : Nat64) {
 
         var keyHash : Nat32 = Blob.hash(key);
@@ -36,7 +37,7 @@ module {
         };
     };
 
-
+    // Get keyinfo-memory adresses for a provided key
     public func get_values(key : Blob, memoryStorage : MemoryStorage):List.List<Nat64>{
         
         var keyHash : Nat32 = Blob.hash(key);

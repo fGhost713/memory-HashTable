@@ -16,7 +16,7 @@ module {
         bench.description("Delete existing items benchmark");
 
         bench.rows(["memoryHashTable"]);
-        bench.cols(["1","10", "100", "1000","10000"]);
+        bench.cols(["1","10", "100", "1000","10000", "100000"]);
 
         type OwnType = {
             myNumber : Nat;
@@ -33,7 +33,7 @@ module {
         let memoryItem = lib.get_new_memory_storage(8);
         let mem = lib.MemoryHashTable(memoryItem);
 
-         for (i in Iter.range(1, 10000)) {
+         for (i in Iter.range(1, 100000)) {
                         let key1 : Blob = lib.Blobify.Text.to_blob("key"#debug_show(i));
                         ignore mem.put(key1, ownType1Blob);
          };
@@ -47,7 +47,7 @@ module {
                 if (row == "memoryHashTable") {
                     for (i in Iter.range(1, n)) {
                         let key1 : Blob = lib.Blobify.Text.to_blob("key"#debug_show(i));
-                        ignore mem.delete(key1);
+                        mem.delete(key1);
                     };
                 };
             }
