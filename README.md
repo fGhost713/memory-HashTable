@@ -22,7 +22,7 @@ for the blob-value.
 
     import Blob "mo:base/Blob";
     import Nat64 "mo:base/Nat64";
-    import lib "lib";
+    import lib "mo:memory-hashtable";
 
     actor {
 
