@@ -58,9 +58,9 @@ module {
                 var updatePossible : Bool = false;
 
 
-                if (totalSizeFromAlreadyStoredBlob > memoryStorage.replaceBufferSize) {
+                if (totalSizeFromAlreadyStoredBlob > 16) {
 
-                    let freeSizeAvailable : Nat = Nat64.toNat(totalSizeFromAlreadyStoredBlob - memoryStorage.replaceBufferSize);                           
+                    let freeSizeAvailable : Nat = Nat64.toNat(totalSizeFromAlreadyStoredBlob - 16);                           
                     if (blobToStoreOrUpdateSize <= freeSizeAvailable) {
                         updatePossible := true;
                     };

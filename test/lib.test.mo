@@ -132,6 +132,35 @@ import { test; suite } "mo:test";
                 },
 
             );
+
+            test(
+                "put many items test",
+                func() {
+
+                    let memoryItem = lib.get_new_memory_storage(0);
+                    let mem = lib.MemoryHashTable(memoryItem);
+
+                    for (i in Iter.range(1, 10000)) {
+                        let key1 : Blob = lib.Blobify.Text.to_blob("key"#debug_show(i));
+                        ignore mem.put(key1, ownType1Blob);
+                    };
+
+
+                    for (i in Iter.range(1, 10000)) {
+                        let key1 : Blob = lib.Blobify.Text.to_blob("key"#debug_show(i));
+                        ignore mem.put(key1, ownType2Blob);
+                    };
+
+
+                    for (i in Iter.range(1, 10000)) {
+                        let key1 : Blob = lib.Blobify.Text.to_blob("key"#debug_show(i));
+                        let value = mem.get(key1);
+                        ownType_blobs_are_not_null_and_equal_check(value, Option.make(ownType2Blob));
+                    };
+
+                },
+
+            );
                    test(
                 "update test",
                 func() {
@@ -160,7 +189,7 @@ import { test; suite } "mo:test";
 
                     let shouldFitType:OwnType = {
                         myNumber = ownType2.myNumber;
-                        myText = "Hello Worldabcd";
+                        myText = "Hello Worldabc";
                     };
 
                     let blob1:Blob = to_candid(shouldFitType);
