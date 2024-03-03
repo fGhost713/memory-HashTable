@@ -1,0 +1,18 @@
+[package]
+name = "memory-hashtable"
+version = "1.0.0"
+description = "Storing/updating/retreiving of a single blob-value per key. (url: https://github.com/fGhost713/memory-HashTable)"
+repository = "https://github.com/fGhost713/memory-HashTable"
+keywords = [ "storing", "memory", "hashlist", "hashmap", "datastructure" ]
+license = "MIT"
+
+[dependencies]
+base = "0.10.4"
+memory-region = "0.2.0"
+StableTrieMap = "https://github.com/NatLabs/StableTrieMap#main@4781cb03efd34b124c22396c69710b374366c797"
+itertools = "0.2.1"
+test = "1.2.0"
+memory-buffer = "0.0.2"
+
+[toolchain]
+wasmtime = "18.0.1"
