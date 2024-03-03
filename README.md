@@ -3,17 +3,17 @@
 ## Notice
 
 This module is built on top of the MemoryRegion module from NatLabs. (https://github.com/NatLabs/memory-region)
-</br>
+<br/>
 Thanks to Natlabs for their incredible work.
 
 ## Description
 The module memory-hashtable is designed to store, update, delete, and retrieve a blob-value that is associated with a specific blob-key. This creates a mapping from the key to the value, where both the key and value are of type blob. The storing is taking place into memory, where more than 32 GB can be used.
-</br></br>
-Key:</br>
+<br/><br/>
+Key:<br/>
 The method 'to_candid' should never be used to generate the blob-key. The blob key must be deterministic, meaning that it should always be the same for the same key. However, this is not guaranteed for the 'to_candid' method.
 (see https://forum.dfinity.org/t/candid-to-candid-motoko-assumptions)
-</br></br>
-Value:</br>
+<br/><br/>
+Value:<br/>
 Generating the corresponding blob (from value) with the 'to_candid' method is not problematic as no equality-check is required
 for the blob-value.
 
