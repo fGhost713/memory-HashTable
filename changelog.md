@@ -28,3 +28,7 @@ Before:
         };
     };
 
+## Version 1.0.4
+
+- Install-steps now added in readme.md (I forgot to add these...)
+- Two wrong comments adjusted

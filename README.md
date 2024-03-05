@@ -3,19 +3,41 @@
 ## Notice
 
 This module is built on top of the MemoryRegion module from NatLabs. (https://github.com/NatLabs/memory-region)
-<br/>
+
 Thanks to Natlabs for their incredible work.
 
 ## Description
 The module memory-hashtable is designed to store, update, delete, and retrieve a blob-value that is associated with a specific blob-key. This creates a mapping from the key to the value, where both the key and value are of type blob. The storing is taking place into memory, where more than 32 GB can be used.
-<br/><br/>
-Key:<br/>
+
+Key:
+
 The method 'to_candid' should never be used to generate the blob-key. The blob key must be deterministic, meaning that it should always be the same for the same key. However, this is not guaranteed for the 'to_candid' method.
 (see https://forum.dfinity.org/t/candid-to-candid-motoko-assumptions)
-<br/><br/>
-Value:<br/>
+
+
+Value:
+
 Generating the corresponding blob (from value) with the 'to_candid' method is not problematic as no equality-check is required
 for the blob-value.
+
+## Installation
+
+This module is provided through the package-manager mops. If you want install this module into your motoko project then you need to execute these steps in the console.
+
+1) Navigate into your motoko project folder
+
+2) If mops is not already installed, then install mops:
+
+        sudo npm i -g ic-mops
+
+3) Initialize mops:
+
+        mops init
+
+3) Install this module:
+
+	    mops add memory-hashtable
+
 
 ## Example usage
 

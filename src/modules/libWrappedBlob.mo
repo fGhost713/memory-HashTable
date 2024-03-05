@@ -265,7 +265,7 @@ module {
         iter := Itertools.chain(iter, Iter.fromArray(blob_internalBlobSize));
         iter := Itertools.chain(iter, item.internalBlob.vals());
         if (addReplaceBuffer == true and memoryStorage.replaceBufferSize > 0){
-            // Add 8 bytes (Nat64 as blob)
+            // Add replace-buffer bytes
              
             iter := Itertools.chain(iter, Iter.fromArray(memoryStorage.replaceBufferAsBlob));
         };
