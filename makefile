@@ -37,6 +37,7 @@ ifeq (, $(shell which $(HOME)/bin/vessel))
 	rm installvessel.sh -f
 endif	
 
+	mops init
 	mops add memory-buffer
 	mops add test
 	mops add memory-region

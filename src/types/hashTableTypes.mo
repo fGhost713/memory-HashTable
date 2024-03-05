@@ -24,8 +24,7 @@ module {
         replaceBufferAsBlob:[Nat8]
     };
 
-    /// The complete key as blob is stored here (So we can compare it, in case of hash-collision),
-    /// and also the first-and last used index for the memory-adresses, where the actual blob is stored.
+    /// The complete key as blob is stored here (So we can compare it, in case of hash-collision)
     public type KeyInfo = {
 
         // The totalsize in bytes used for this type
