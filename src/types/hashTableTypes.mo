@@ -25,6 +25,7 @@ module {
     };
 
     /// The complete key as blob is stored here (So we can compare it, in case of hash-collision)
+    /// This type is not used but instead stored directly into memory.
     public type KeyInfo = {
 
         // The totalsize in bytes used for this type
@@ -42,6 +43,7 @@ module {
     };
 
     /// Wrapper type  that holds the actual blob and some meta-data
+    /// This type is not used but instead stored directly into memory.
     public type WrappedBlob = {
 
         //The size of this instance in bytes.

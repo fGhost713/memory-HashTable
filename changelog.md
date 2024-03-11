@@ -32,3 +32,6 @@ Before:
 
 - Install-steps now added in readme.md (I forgot to add these...)
 - Two wrong comments adjusted
+
+## Version 1.0.5
+- The performance enhanced ( == less cycles needed for the operations. approx 30-40 %)

@@ -38,13 +38,13 @@ module {
     };
 
     // Get keyinfo-memory adresses for a provided key
-    public func get_values(key : Blob, memoryStorage : MemoryStorage):List.List<Nat64>{
-        
+    public func get_values(key : Blob, memoryStorage : MemoryStorage) : List.List<Nat64> {
+
         var keyHash : Nat32 = Blob.hash(key);
         let currentIndizesOrNull = StableTrieMap.get(memoryStorage.index_mappings, Nat32.equal, nat32Identity, keyHash);
         switch (currentIndizesOrNull) {
             case (?indizesList) {
-                return indizesList;       
+                return indizesList;
             };
             case (_) {
                 return List.nil<Nat64>();
