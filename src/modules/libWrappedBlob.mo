@@ -43,16 +43,14 @@ module {
     // Add or update value by key
     public func add_or_update(key : Blob, memoryStorage : MemoryStorage, blobToStoreOrUpdate : Blob) : Nat64 {
 
-        var hashedKey = Blob.hash(key);
-        let getKeyInfoResult : (?KeyInfo, Nat64) = libKeyInfo.get_keyinfo(key, memoryStorage);
-        let keyInfoOrNull = getKeyInfoResult.0;
-        let keyInfoAddress : Nat64 = getKeyInfoResult.1;
+        let hashedKey = Blob.hash(key);
+        let memoryAddressesOrNull = libKeyInfo.get_memory_addresses(key, memoryStorage);
 
-        switch (keyInfoOrNull) {
-            case (?keyInfo) {
-                //key with value is already existing:
+        switch (memoryAddressesOrNull) {
+            case (?memoryAddresses) { //key with value is already existing:
 
-                let alreadyStoredWrappedBlobAddress : Nat64 = keyInfo.wrappedBlobAddress;
+                let keyInfoAddress = memoryAddresses.0;
+                let alreadyStoredWrappedBlobAddress = memoryAddresses.1;
                 let totalSizeFromAlreadyStoredBlob : Nat64 = get_wrapped_blob_totalsize(memoryStorage, alreadyStoredWrappedBlobAddress);
                 let blobToStoreOrUpdateSize : Nat = blobToStoreOrUpdate.size();
                 var updatePossible : Bool = false;
@@ -68,13 +66,14 @@ module {
 
                 if (updatePossible == false) {
 
-                    //Delete the old item:
-                    ignore MemoryRegion.removeBlob(
+                    //Mark the memory region as free:
+
+                    MemoryRegion.deallocate(
                         memoryStorage.memory_region,
-                        Nat64.toNat(keyInfo.wrappedBlobAddress),
+                        Nat64.toNat(alreadyStoredWrappedBlobAddress),
                         Nat64.toNat(totalSizeFromAlreadyStoredBlob),
                     );
-
+          
                     // Add new item:
                     let storedAddress : Nat64 = create_and_add_new_wrappedblob_into_memory_Internal(memoryStorage, blobToStoreOrUpdate);
 
@@ -153,15 +152,13 @@ module {
         // store the blob into memory
         let valueStoredAddressNat64 : Nat64 = create_and_add_new_wrappedblob_into_memory_Internal(memoryStorage, blobToStore);
 
-        // First add dummy blob into memory
-        let dummyKeyInfoSizeNeeded:Nat = key.size() + 24;
-        let dummyBytes = Array.tabulate<Nat8>(dummyKeyInfoSizeNeeded, func i = 255);
-        let dummyBlob:Blob = Blob.fromArray(dummyBytes);
-        let keyInfoAddress:Nat = MemoryRegion.addBlob(memoryStorage.memory_region, dummyBlob);
-        let keyInfoAddressNat64:Nat64 = Nat64.fromNat(keyInfoAddress);
-
+        //allocate memory and get address:
+        let keyInfoSizeNeeded:Nat = key.size() + 24;
+        let keyInfoMemoryAddress =  MemoryRegion.allocate(memoryStorage.memory_region,keyInfoSizeNeeded);
+        let keyInfoAddressNat64:Nat64 = Nat64.fromNat(keyInfoMemoryAddress);
+        
         // Now update the keyinfo memory values
-        Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64, Nat64.fromNat(dummyKeyInfoSizeNeeded));
+        Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64, Nat64.fromNat(keyInfoSizeNeeded));
         Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64 + 8, Nat64.fromNat(key.size()));
         Region.storeNat64(memoryStorage.memory_region.region,keyInfoAddressNat64 + 16, valueStoredAddressNat64);
         Region.storeBlob(memoryStorage.memory_region.region, keyInfoAddressNat64 + 24, key);
@@ -175,23 +172,21 @@ module {
         return (keyInfoAddressNat64, valueStoredAddressNat64);
     };
 
-    // First we will store dummy blob into memory and then manipulate the memory-location so that all necessary information is included.
-    // This method is faster than the native approach: create WrappedBlob-type and then convert to blob and then store that blob into memory. 
+    // Add new wrappedBlob into memory with included 'internalBlobToStore'.
     private func create_and_add_new_wrappedblob_into_memory_Internal(memoryStorage : MemoryStorage, internalBlobToStore : Blob) : Nat64 {
 
         // First add dummy blob into memory
         let wrappedBlobSizeNeeded:Nat = internalBlobToStore.size() + 16 + Nat64.toNat(memoryStorage.replaceBufferSize);
-        let dummyBytes = Array.tabulate<Nat8>(wrappedBlobSizeNeeded, func i = 255);
-        let dummyBlob:Blob = Blob.fromArray(dummyBytes);
-        let memoryAddress:Nat = MemoryRegion.addBlob(memoryStorage.memory_region, dummyBlob);
-        let memoryAddressNat64:Nat64 = Nat64.fromNat(memoryAddress);
 
-        // Now update the wrappedBlob from writing into memory-location directly
-        Region.storeNat64(memoryStorage.memory_region.region,  memoryAddressNat64, Nat64.fromNat(wrappedBlobSizeNeeded));
-        Region.storeNat64(memoryStorage.memory_region.region,  memoryAddressNat64 + 8, Nat64.fromNat(internalBlobToStore.size()));
-        Region.storeBlob(memoryStorage.memory_region.region, memoryAddressNat64 + 16 , internalBlobToStore);
+        //allocate memory and get address:
+        let wrappedBlobMemoryAddress =  MemoryRegion.allocate(memoryStorage.memory_region,wrappedBlobSizeNeeded);
+        let wrappedBlobMemoryAddressNat64:Nat64 = Nat64.fromNat(wrappedBlobMemoryAddress);
 
-        return memoryAddressNat64;
+        Region.storeNat64(memoryStorage.memory_region.region,  wrappedBlobMemoryAddressNat64, Nat64.fromNat(wrappedBlobSizeNeeded));
+        Region.storeNat64(memoryStorage.memory_region.region,  wrappedBlobMemoryAddressNat64 + 8, Nat64.fromNat(internalBlobToStore.size()));
+        Region.storeBlob(memoryStorage.memory_region.region, wrappedBlobMemoryAddressNat64 + 16 , internalBlobToStore);
+
+        return wrappedBlobMemoryAddressNat64;
     };
 
     
@@ -215,8 +210,7 @@ module {
     };
 
     private func get_wrapped_blob_totalsize(memoryStorage : MemoryStorage, address : Nat64) : Nat64 {
-        let totalSize = Region.loadNat64(memoryStorage.memory_region.region, address);
-        return totalSize;
+        Region.loadNat64(memoryStorage.memory_region.region, address);
     };
 
     public func get_internal_blob_from_blob(item : Blob) : Blob {

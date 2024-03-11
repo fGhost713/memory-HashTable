@@ -77,11 +77,49 @@ module {
 
     };
 
+    
+    public func get_memory_addresses(key : Blob, memoryStorage : MemoryStorage)
+    :?(Nat64 /*key info address*/, Nat64 /*wrappedBlob address*/) {
+
+        let keySize = Nat64.fromNat(key.size());
+        let valuesList = libIndexMapping.get_values(key, memoryStorage);
+        let listSize : Nat = List.size(valuesList);
+        if (listSize == 0) {
+            return null;
+        };
+
+        for (index in Iter.range(0, listSize -1)) {
+            let adressOrNull = List.get(valuesList, index);
+            switch (adressOrNull) {
+                case (?foundAddress) {
+
+                    
+                    
+                    let sizeOfKeyBlob = Region.loadNat64(memoryStorage.memory_region.region, foundAddress + 8);
+                    if (sizeOfKeyBlob == keySize){
+                        let keyAsBlob = Region.loadBlob(memoryStorage.memory_region.region,foundAddress +24, Nat64.toNat(sizeOfKeyBlob));
+                        if (Blob.equal(keyAsBlob, key) == true) {
+                            let wrappedBlobMemoryAddress = Region.loadNat64(memoryStorage.memory_region.region, foundAddress + 16);
+                            return Option.make( (foundAddress,wrappedBlobMemoryAddress ));
+                        };
+                    };                                                            
+                };
+                case (_) {
+                    // do nothing
+                };
+
+            };
+        };
+
+        return null;
+
+    };
+
     // Get keyinfo by key
     public func get_keyinfo(key : Blob, memoryStorage : MemoryStorage) : (?KeyInfo, Nat64 /*address of keyinfo*/) {
 
-        var keySize = Nat64.fromNat(key.size());
-        var keyHash : Nat32 = Blob.hash(key);
+        let keySize = Nat64.fromNat(key.size());
+        let keyHash : Nat32 = Blob.hash(key);
 
         let valuesList = libIndexMapping.get_values(key, memoryStorage);
         let listSize : Nat = List.size(valuesList);
