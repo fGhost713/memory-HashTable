@@ -97,6 +97,26 @@ This module is provided through the package-manager mops. If you want install th
 
 ## Benchmarks
 
+### Description
+
+    the benchmarks uses 'ownType1Blob' as the blob-value for the storing/updating/deleting/retrieving operations:
+        
+        type OwnType = {
+            myNumber : Nat;
+            myText : Text;
+        };
+
+        let ownType1 : OwnType = {
+            myNumber : Nat = 2345;
+            myText : Text = "Hello World";
+        };
+
+        let ownType1Blob : Blob = to_candid (ownType1);
+
+
+
+### Benchmark results
+
     Running bench/add_items.bench.mo...
 
 
@@ -108,9 +128,9 @@ This module is provided through the package-manager mops. If you want install th
 
     Instructions
 
-    |                 |      1 |      10 |       100 |       1000 |       10000 |
-    | :-------------- | -----: | ------: | --------: | ---------: | ----------: |
-    | memoryHashTable | 18_692 | 158_980 | 1_931_819 | 22_798_640 | 267_334_891 |
+    |                 |      1 |     10 |       100 |       1000 |       10000 |
+    | :-------------- | -----: | -----: | --------: | ---------: | ----------: |
+    | memoryHashTable | 10_613 | 82_130 | 1_095_076 | 13_631_875 | 164_314_566 |
 
 
     Heap
@@ -135,14 +155,14 @@ This module is provided through the package-manager mops. If you want install th
 
     |                 |      1 |      10 |       100 |       1000 |       10000 |
     | :-------------- | -----: | ------: | --------: | ---------: | ----------: |
-    | memoryHashTable | 29_811 | 281_762 | 2_935_332 | 29_415_589 | 284_147_554 |
+    | memoryHashTable | 26_584 | 257_644 | 2_614_367 | 25_494_490 | 234_850_961 |
 
 
     Heap
 
     |                 |   1 |   10 |    100 |    1000 |    10000 |
     | :-------------- | --: | ---: | -----: | ------: | -------: |
-    | memoryHashTable | 192 | -668 | -7_496 | -80_668 | -793_048 |
+    | memoryHashTable | 176 | -720 | -7_428 | -80_684 | -793_048 |
 
 
     ——————————————————————————————————————————————————
@@ -158,9 +178,9 @@ This module is provided through the package-manager mops. If you want install th
 
     Instructions
 
-    |                 |      1 |     10 |     100 |       1000 |       10000 |
-    | :-------------- | -----: | -----: | ------: | ---------: | ----------: |
-    | memoryHashTable | 10_433 | 89_267 | 959_331 | 10_205_446 | 109_313_888 |
+    |                 |     1 |     10 |     100 |      1000 |      10000 |
+    | :-------------- | ----: | -----: | ------: | --------: | ---------: |
+    | memoryHashTable | 8_381 | 69_071 | 695_231 | 6_834_881 | 65_523_303 |
 
 
     Heap
@@ -174,18 +194,9 @@ This module is provided through the package-manager mops. If you want install th
 
     Running bench/update_items.bench.mo...
 
-
-
-    Updating existing items
-
-    Updating existing items benchmark
-
-
-    Instructions
-
-    |                 |      1 |     10 |       100 |       1000 |       10000 |
-    | :-------------- | -----: | -----: | --------: | ---------: | ----------: |
-    | memoryHashTable | 11_953 | 95_558 | 1_017_510 | 10_806_649 | 115_856_995 |
+    |                 |     1 |     10 |     100 |      1000 |      10000 |
+    | :-------------- | ----: | -----: | ------: | --------: | ---------: |
+    | memoryHashTable | 9_825 | 74_450 | 744_066 | 7_342_090 | 71_126_382 |
 
 
     Heap
@@ -199,18 +210,9 @@ This module is provided through the package-manager mops. If you want install th
 
     Running bench/update_too_big_items.bench.mo...
 
-
-
-    Updating with fallback to put
-
-    Updating with fallback to put benchmark
-
-
-    Instructions
-
     |                 |      1 |      10 |       100 |       1000 |       10000 |
     | :-------------- | -----: | ------: | --------: | ---------: | ----------: |
-    | memoryHashTable | 27_138 | 241_482 | 2_809_671 | 31_574_397 | 347_743_654 |
+    | memoryHashTable | 14_227 | 123_261 | 1_563_097 | 18_380_590 | 205_731_563 |
 
 
     Heap

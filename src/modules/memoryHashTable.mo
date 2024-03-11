@@ -23,13 +23,14 @@ module {
 
         // Get value (as blob) by key
         public func get(key : Blob) : ?Blob {
-            let keyInfo : (?KeyInfo, Nat64 /*address of keyinfo*/) = LibKeyInfo.get_keyinfo(key, memoryStorage);
 
-            let keyInfoOrNull = keyInfo.0;
-            switch (keyInfoOrNull) {
-                case (?keyinfo) {
+            let memoryAddressesOrNull = LibKeyInfo.get_memory_addresses(key, memoryStorage);
+            
+            switch (memoryAddressesOrNull) {
+                case (?memoryAddresses) {                 
+                    let wrappedBlobAddress = memoryAddresses.1;
                     let internalBlob:Blob = LibWrappedBlob.get_internal_blob_from_memory( memoryStorage,
-                        keyinfo.wrappedBlobAddress);
+                        wrappedBlobAddress);
                     return Option.make(internalBlob);
                 };
                 case (_) {
