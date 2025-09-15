@@ -1,16 +1,10 @@
 import Blob "mo:base/Blob";
 import HashTableTypes "../types/hashTableTypes";
-import StableTrieMap "mo:StableTrieMap";
+import StableTrieMap "../helpers/stableTrieMap";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
-import Region "mo:base/Region";
-import Iter "mo:base/Iter";
 import List "mo:base/List";
-import Binary "../helpers/binary";
-import Itertools "mo:itertools/Iter";
-import Option "mo:base/Option";
-import Debug "mo:base/Debug";
-import { MemoryRegion } "mo:memory-region";
+
 
 module {
 

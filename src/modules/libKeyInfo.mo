@@ -1,15 +1,11 @@
 import Blob "mo:base/Blob";
 import HashTableTypes "../types/hashTableTypes";
-import StableTrieMap "mo:StableTrieMap";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Region "mo:base/Region";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
-import Binary "../helpers/binary";
-import Itertools "mo:itertools/Iter";
 import Option "mo:base/Option";
-import Debug "mo:base/Debug";
 import { MemoryRegion } "mo:memory-region";
 import libIndexMapping "libIndexMapping";
 
@@ -67,7 +63,7 @@ module {
     public func delete_keyinfo(memoryStorage : MemoryStorage, keyInfoAddress : Nat64) {
 
         let keyInfoSize : Nat64 = Region.loadNat64(memoryStorage.memory_region.region, keyInfoAddress);
-        
+
         // Deleting by giving the memory free
         MemoryRegion.deallocate(memoryStorage.memory_region, Nat64.toNat(keyInfoAddress), Nat64.toNat(keyInfoSize));
     };

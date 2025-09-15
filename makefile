@@ -1,16 +1,16 @@
-install-check: 
+install-check:
 
 ifeq (, $(shell which curl))
-	@echo No curl is installed, curl will be installed now.... 
+	@echo No curl is installed, curl will be installed now....
 	@sudo apt-get install curl -y
 endif
 
-ifeq (,$(shell which $(HOME)/bin/dfx))	
+ifeq (,$(shell which $(HOME)/bin/dfx))
 	@echo No dfx is installed, dfx will be installed now....
 	curl -fsSL https://internetcomputer.org/install.sh -o install_dfx.sh
 	chmod +x install_dfx.sh
 	./install_dfx.sh
-	rm install_dfx.sh		
+	rm install_dfx.sh
 endif
 
 ifeq (, $(shell which nodejs))
@@ -25,7 +25,7 @@ ifeq (, $(shell which mops))
 	sudo npm i -g ic-mops
 endif
 
-ifeq (, $(shell which $(HOME)/bin/vessel))	
+ifeq (, $(shell which $(HOME)/bin/vessel))
 	rm installvessel.sh -f
 	echo '#install vessel'>installvessel.sh
 	echo cd $(HOME)/bin>>installvessel.sh
@@ -35,12 +35,12 @@ ifeq (, $(shell which $(HOME)/bin/vessel))
 	chmod +x installvessel.sh
 	./installvessel.sh
 	rm installvessel.sh -f
-endif	
+endif
 
 	mops init
-	mops add memory-buffer
 	mops add test
 	mops add memory-region
 	mops add bench --dev
 	mops update
-	dfx upgrade
+#	dfx upgrade
+	dfxvm update
