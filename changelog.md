@@ -35,3 +35,11 @@ Before:
 
 ## Version 1.0.5
 - The performance enhanced ( == less cycles needed for the operations. approx 30-40 %)
+
+## Version 1.0.6
+
+- updated dependencies
+
+- removed dependency memory-buffer and StableTrieMap through copy and paste  
+  the needed code directly.
+  

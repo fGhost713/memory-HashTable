@@ -1,18 +1,11 @@
 import Blob "mo:base/Blob";
 import HashTableTypes "../types/hashTableTypes";
-import StableTrieMap "mo:StableTrieMap";
+import StableTrieMap "../helpers/stableTrieMap";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Region "mo:base/Region";
-import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import List "mo:base/List";
-import Binary "../helpers/binary";
-import Itertools "mo:itertools/Iter";
-import Option "mo:base/Option";
-import Result "mo:base/Result";
-import Debug "mo:base/Debug";
-import Array "mo:base/Array";
 import libKeyInfo "libKeyInfo";
 import { MemoryRegion } "mo:memory-region";
 import libIndexMapping "libIndexMapping";
@@ -90,7 +83,7 @@ module {
                 };
             };
             case (_) {   // The key was not used before
-               
+
                 let addresses = add_new_item_internal_and_update_key_mappings(key, memoryStorage, blobToStoreOrUpdate);
 
                 return addresses.1;

@@ -1,5 +1,5 @@
 import { MemoryRegion } "mo:memory-region";
-import StableTrieMap "mo:StableTrieMap";
+import StableTrieMap "../helpers/stableTrieMap";
 import List "mo:base/List";
 import Nat64 "mo:base/Nat64";
 import Nat32 "mo:base/Nat32";
